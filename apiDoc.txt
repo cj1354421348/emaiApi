@@ -1,0 +1,1333 @@
+Email Testing API
+Effortlessly create and manage email accounts, domains, and messages with our powerful API. Perfect for all your email testing needs!
+General information
+The smtp.dev API specification documentation is written using the OpenAPI Specification v3.
+
+You can download the file here and test it here.
+
+Usage of our service for illegal activity is strictly prohibited.
+Integrations
+We would appreciate any integrations to make usage of our service, please let us know to be added to the list.
+
+API Documentation
+Base URL:
+
+
+https://api.smtp.dev
+Error handling
+Successful
+Generally, the request is successful when the response code is 200, 201 or 204 (You could also check if the code is between 200 and 204)
+
+Unsuccessful
+Usually, when the request has an error the code is between 400 and 430.
+
+Bad request 400: Something in your payload is missing! Or, the payload isn't there at all.
+
+Unauthorized 401: Your token isn't correct (Or the headers hasn't a token at all!). Remember, every request should be authenticated with a Bearer token!
+
+Not found 404: You're trying to access an account that doesn't exist? Or maybe reading a non-existing message? Go check that!
+
+Method not allowed 405: Maybe you're trying to GET a /tokens or POST a /messages. Check the path you're trying to make a request to and check if the method is the correct one.
+
+I'm a teapot 418: Who knows? Maybe the server becomes a teapot!
+
+Unprocessable entity 422: Some went wrong on your payload. Like, the username of the address while creating the account isn't long enough, or, the account's domain isn't correct. Things like that.
+
+Too many requests 429: You exceeded the limit of requests per second! Try delaying the request by one second!
+
+Authentication
+All API requests require authentication using an API key.
+
+To authenticate, add the following header to each request:
+
+
+X-API-KEY: smtplabs_your_api_key_here
+How to get it?
+
+If you don't have an API key yet, create a new one on the API Keys page.
+
+Example request with authentication:
+
+
+curl -X GET "https://api.smtp.dev/accounts" \
+  -H "X-API-KEY: smtplabs_your_api_key_here" \
+  -H "Accept: application/json"
+Rate Limiting
+The API has the following rate limits:
+
+General Quota: 2048 queries per second (QPS) per IP address
+When rate limited, the API will return a 429 Too Many Requests status code
+If you receive a 429 response, you should:
+
+Implement exponential backoff in your requests
+Add a delay between batches of requests
+Consider optimizing your code to make fewer API calls if possible
+Domain
+List Domains
+
+GET /domains
+You have to use this when creating an account, to retrieve the domain.
+
+Returns a list of domains.
+
+Body:
+
+None
+
+Params:
+
+isActive
+boolean
+Filter by active status
+page
+int
+The collection page number
+curl Example:
+
+
+curl -X GET "https://api.smtp.dev/domains?isActive=true&page=1" \
+  -H "X-API-KEY: smtplabs_your_api_key_here" \
+  -H "Accept: application/json"
+Response:
+
+
+{
+  "member": [
+    {
+      "id": "string",
+      "domain": "string",
+      "isActive": true,
+      "createdAt": "2025-04-01T00:00:00.000Z",
+      "updatedAt": "2025-04-01T00:00:00.000Z"
+    }
+  ],
+  "totalItems": 0,
+  "view": {
+    "id": "string",
+    "type": "string",
+    "first": "string",
+    "last": "string",
+    "previous": "string",
+    "next": "string"
+  },
+  "search": {
+    "type": "string",
+    "template": "string",
+    "variableRepresentation": "string",
+    "mapping": [
+      {
+        "type": "string",
+        "variable": "string",
+        "property": "string",
+        "required": true
+      }
+    ]
+  }
+}
+Create a Domain
+
+POST /domains
+Creates a Domain resource.
+
+Body:
+
+domain
+string
+required
+Domain name. Example: example.com
+isActive
+boolean
+Domain activation status
+Params:
+
+None
+
+curl Example:
+
+
+curl -X POST "https://api.smtp.dev/domains" \
+  -H "X-API-KEY: smtplabs_your_api_key_here" \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json" \
+  -d '{
+    "domain": "example.com",
+    "isActive": true
+  }'
+Response:
+
+
+{
+  "@context": "string",
+  "@id": "string",
+  "@type": "string",
+  "id": "string",
+  "domain": "example.com",
+  "isActive": true,
+  "createdAt": "2025-04-01T00:00:00.000Z",
+  "updatedAt": "2025-04-01T00:00:00.000Z"
+}
+Get a Domain
+
+GET /domains/{id}
+Retrieves a Domain resource by its id.
+
+Body:
+
+None
+
+Params:
+
+id
+string
+required
+The domain identifier
+curl Example:
+
+
+curl -X GET "https://api.smtp.dev/domains/{id}" \
+  -H "X-API-KEY: smtplabs_your_api_key_here" \
+  -H "Accept: application/json"
+Response:
+
+
+{
+  "@context": "string",
+  "@id": "string",
+  "@type": "string",
+  "id": "string",
+  "domain": "example.com",
+  "isActive": true,
+  "createdAt": "2025-04-01T00:00:00.000Z",
+  "updatedAt": "2025-04-01T00:00:00.000Z"
+}
+Delete a Domain
+
+DELETE /domains/{id}
+Deletes the Domain resource.
+
+Body:
+
+None
+
+Params:
+
+id
+string
+required
+The domain identifier
+curl Example:
+
+
+curl -X DELETE "https://api.smtp.dev/domains/{id}" \
+  -H "X-API-KEY: smtplabs_your_api_key_here"
+Response:
+
+None
+
+(Returns status code 204 if successful.)
+
+Update a Domain
+
+PATCH /domains/{id}
+Updates the Domain resource.
+
+Body:
+
+isActive
+boolean
+required
+Domain activation status
+Params:
+
+id
+string
+required
+The domain identifier
+curl Example:
+
+
+curl -X PATCH "https://api.smtp.dev/domains/{id}" \
+  -H "X-API-KEY: smtplabs_your_api_key_here" \
+  -H "Content-Type: application/merge-patch+json" \
+  -H "Accept: application/json" \
+  -d '{
+    "isActive": true
+  }'
+Response:
+
+
+{
+  "domain": "example.com",
+  "isActive": true
+}
+Account
+List Accounts
+
+GET /accounts
+Retrieves the collection of Account resources.
+
+Body:
+
+None
+
+Params:
+
+address
+string
+Filter by account address
+isActive
+boolean
+Filter by active status
+page
+int
+The collection page number
+curl Example:
+
+
+curl -X GET "https://api.smtp.dev/accounts?address=user@example.com&isActive=true&page=1" \
+  -H "X-API-KEY: smtplabs_your_api_key_here" \
+  -H "Accept: application/json"
+Response
+
+
+{
+  "member": [
+    {
+      "id": "string",
+      "address": "user@example.com",
+      "quota": 0,
+      "used": 0,
+      "isActive": true,
+      "isDeleted": false,
+      "createdAt": "2025-04-01T00:00:00.000Z",
+      "updatedAt": "2025-04-01T00:00:00.000Z"
+    }
+  ],
+  "totalItems": 0,
+  "view": {
+    "id": "string",
+    "type": "string",
+    "first": "string",
+    "last": "string",
+    "previous": "string",
+    "next": "string"
+  },
+  "search": {
+    "type": "string",
+    "template": "string",
+    "variableRepresentation": "string",
+    "mapping": [
+      {
+        "type": "string",
+        "variable": "string",
+        "property": "string",
+        "required": true
+      }
+    ]
+  }
+}
+Create an Account
+
+POST /accounts
+Creates an Account resource
+
+Body:
+
+address
+string
+required
+Account's address. Example: user@example.com
+password
+string
+required
+Account's password.
+Params
+
+None
+
+curl Example:
+
+
+curl -X POST "https://api.smtp.dev/accounts" \
+  -H "X-API-KEY: smtplabs_your_api_key_here" \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json" \
+  -d '{
+    "address": "user@example.com",
+    "password": "SecurePassword123"
+  }'
+Response
+
+
+{
+  "@context": "string",
+  "@id": "string",
+  "@type": "string",
+  "id": "string",
+  "address": "user@example.com",
+  "quota": 0,
+  "used": 0,
+  "isActive": false,
+  "isDeleted": true,
+  "mailboxes": [
+    {
+      "@context": "string",
+      "@id": "string",
+      "@type": "string",
+      "id": "string",
+      "path": "string",
+      "totalMessages": 0,
+      "totalUnreadMessages": 0
+    }
+  ],
+  "createdAt": "2025-04-01T00:00:00.000Z",
+  "updatedAt": "2025-04-01T00:00:00.000Z"
+}
+At this point, you could now send the messages to this address and do all the cool stuff you want to do.
+
+Get an Account
+
+GET /accounts/{id}
+Get an Account resource by its id
+
+Body:
+
+None
+
+Params:
+
+id
+string
+required
+The account you want to get by id
+curl Example:
+
+
+curl -X GET "https://api.smtp.dev/accounts/{accountId}" \
+  -H "X-API-KEY: smtplabs_your_api_key_here" \
+  -H "Accept: application/json"
+Response:
+
+
+{
+  "@context": "string",
+  "@id": "string",
+  "@type": "string",
+  "id": "string",
+  "address": "user@example.com",
+  "quota": 0,
+  "used": 0,
+  "isActive": false,
+  "isDeleted": true,
+  "mailboxes": [
+    {
+      "@context": "string",
+      "@id": "string",
+      "@type": "string",
+      "id": "string",
+      "path": "string",
+      "totalMessages": 0,
+      "totalUnreadMessages": 0
+    }
+  ],
+  "createdAt": "2025-04-01T00:00:00.000Z",
+  "updatedAt": "2025-04-01T00:00:00.000Z"
+}
+Delete an Account
+
+DELETE /accounts/{id}
+Deletes the Account resource.
+
+Be careful! We can't restore deleted accounts, if you use this method, bye bye dear account :c
+Body:
+
+None
+
+Params:
+
+id
+string
+required
+The account you want to get by id
+curl Example:
+
+
+curl -X DELETE "https://api.smtp.dev/accounts/{accountId}" \
+  -H "X-API-KEY: smtplabs_your_api_key_here"
+Response:
+
+None
+
+(Returns status code 204 if successful.)
+
+Update an Account
+
+PATCH /accounts/{id}
+Updates the Account resource.
+
+Body:
+
+password
+string
+Account's password.
+isActive
+boolean
+Account active status
+Params:
+
+id
+string
+required
+The account identifier
+curl Example:
+
+
+curl -X PATCH "https://api.smtp.dev/accounts/{accountId}" \
+  -H "X-API-KEY: smtplabs_your_api_key_here" \
+  -H "Content-Type: application/merge-patch+json" \
+  -H "Accept: application/json" \
+  -d '{
+    "password": "NewSecurePassword456",
+    "isActive": true
+  }'
+Response:
+
+
+{
+  "address": "user@example.com",
+  "isActive": true
+}
+To check if the account has been updated, you could also check if the status code is 200!
+
+Mailboxes
+List Mailboxes
+
+GET /accounts/{accountId}/mailboxes
+Gets all the Mailbox resources of a given account.
+
+Body:
+
+None
+
+Params:
+
+accountId
+string
+required
+The account identifier.
+page
+int
+The collection page number
+curl Example:
+
+
+curl -X GET "https://api.smtp.dev/accounts/{accountId}/mailboxes?page=1" \
+  -H "X-API-KEY: smtplabs_your_api_key_here" \
+  -H "Accept: application/json"
+Response:
+
+
+{
+  "member": [
+    {
+      "@context": "string",
+      "@id": "string",
+      "@type": "string",
+      "id": "string",
+      "path": "string",
+      "isSystem": false,
+      "autoDeleteEnabled": false,
+      "autoDeleteSeconds": 0,
+      "totalMessages": 0,
+      "totalUnreadMessages": 0,
+      "account": "string",
+      "createdAt": "2025-04-07T05:53:58.747Z",
+      "updatedAt": "2025-04-07T05:53:58.748Z"
+    }
+  ],
+  "totalItems": 0,
+  "view": {
+    "@id": "string",
+    "type": "string",
+    "first": "string",
+    "last": "string",
+    "previous": "string",
+    "next": "string"
+  },
+  "search": {
+    "@type": "string",
+    "template": "string",
+    "variableRepresentation": "string",
+    "mapping": [
+      {
+        "@type": "string",
+        "variable": "string",
+        "property": "string",
+        "required": true
+      }
+    ]
+  }
+}
+Create a Mailbox
+
+POST /accounts/{accountId}/mailboxes
+Creates a Mailbox resource for a given account.
+
+Body:
+
+path
+string
+required
+Mailbox path. Example: INBOX
+Params
+
+accountId
+string
+required
+The account identifier.
+curl Example:
+
+
+curl -X POST "https://api.smtp.dev/accounts/{accountId}/mailboxes" \
+  -H "X-API-KEY: smtplabs_your_api_key_here" \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json" \
+  -d '{
+    "path": "Promotions"
+  }'
+Response
+
+
+{
+  "@context": "string",
+  "@id": "string",
+  "@type": "string",
+  "id": "string",
+  "path": "string",
+  "totalMessages": 0,
+  "totalUnreadMessages": 0,
+  "createdAt": "2025-04-01T00:00:00.000Z",
+  "updatedAt": "2025-04-01T00:00:00.000Z"
+}
+Get a Mailbox
+
+GET /accounts/{accountId}/mailboxes/{id}
+Retrieves a Mailbox resource by its id.
+
+Body:
+
+None
+
+Params:
+
+accountId
+string
+required
+The account identifier.
+id
+string
+required
+The mailbox identifier.
+curl Example:
+
+
+curl -X GET "https://api.smtp.dev/accounts/{accountId}/mailboxes/{mailboxId}" \
+  -H "X-API-KEY: smtplabs_your_api_key_here" \
+  -H "Accept: application/json"
+Response
+
+
+{
+  "@context": "string",
+  "@id": "string",
+  "@type": "string",
+  "id": "string",
+  "path": "string",
+  "totalMessages": 0,
+  "totalUnreadMessages": 0,
+  "createdAt": "2025-04-01T00:00:00.000Z",
+  "updatedAt": "2025-04-01T00:00:00.000Z"
+}
+Delete a Mailbox
+
+DELETE /accounts/{accountId}/mailboxes/{id}
+Deletes the Mailbox resource.
+
+Body:
+
+None
+
+Params:
+
+accountId
+string
+required
+The account identifier.
+id
+string
+required
+The mailbox identifier.
+curl Example:
+
+
+curl -X DELETE "https://api.smtp.dev/accounts/{accountId}/mailboxes/{mailboxId}" \
+  -H "X-API-KEY: smtplabs_your_api_key_here"
+Response:
+
+None
+
+(Returns status code 204 if successful.)
+
+Update a Mailbox
+
+PATCH /accounts/{accountId}/mailboxes/{id}
+Updates the Mailbox resource.
+
+Body:
+
+path
+string
+required
+Mailbox path. Example: INBOX
+Params:
+
+accountId
+string
+required
+The account identifier.
+id
+string
+required
+The mailbox identifier.
+curl Example:
+
+
+curl -X PATCH "https://api.smtp.dev/accounts/{accountId}/mailboxes/{mailboxId}" \
+  -H "X-API-KEY: smtplabs_your_api_key_here" \
+  -H "Content-Type: application/merge-patch+json" \
+  -H "Accept: application/json" \
+  -d '{
+    "path": "Primary"
+  }'
+Response:
+
+
+{
+  "path": "string"
+}
+To check if the mailbox has been updated, you could also check if the status code is 200!
+
+Messages
+List Messages
+
+GET /accounts/{accountId}/mailboxes/{mailboxId}/messages
+Retrieves the collection of Message resources for a given mailbox.
+
+Body:
+
+None
+
+Params:
+
+accountId
+string
+required
+The account identifier.
+mailboxId
+string
+required
+The mailbox identifier.
+page
+int
+required
+The collection page number
+curl Example:
+
+
+curl -X GET "https://api.smtp.dev/accounts/{accountId}/mailboxes/{mailboxId}/messages?page=1" \
+  -H "X-API-KEY: smtplabs_your_api_key_here" \
+  -H "Accept: application/json"
+Response:
+
+
+{
+  "member": [
+    {
+      "id": "string",
+      "msgid": "string",
+      "from": {
+        "name": "string",
+        "address": "string"
+      },
+      "to": [
+        {
+          "name": "string",
+          "address": "string"
+        }
+      ],
+      "subject": "string",
+      "intro": "string",
+      "isRead": true,
+      "isFlagged": true,
+      "hasAttachments": true,
+      "size": 0,
+      "downloadUrl": "string",
+      "createdAt": "2025-04-01T00:00:00.000Z",
+      "updatedAt": "2025-04-01T00:00:00.000Z"
+    }
+  ],
+  "totalItems": 0,
+  "view": {
+    "id": "string",
+    "type": "string",
+    "first": "string",
+    "last": "string",
+    "previous": "string",
+    "next": "string"
+  },
+  "search": {
+    "type": "string",
+    "template": "string",
+    "variableRepresentation": "string",
+    "mapping": [
+      {
+        "type": "string",
+        "variable": "string",
+        "property": "string",
+        "required": true
+      }
+    ]
+  }
+}
+There are up to 30 messages per page, to check the total number, retrieve it from "totalItems"
+
+Get a Message
+
+GET /accounts/{accountId}/mailboxes/{mailboxId}/messages/{id}
+Retrieves a Message resource by its id (this has way more information than a message retrieved with List Messages)
+
+Body:
+
+None
+
+Params:
+
+accountId
+string
+required
+The account identifier.
+mailboxId
+string
+required
+The mailbox identifier.
+id
+string
+required
+The message identifier.
+curl Example:
+
+
+curl -X GET "https://api.smtp.dev/accounts/{accountId}/mailboxes/{mailboxId}/messages/{id}" \
+  -H "X-API-KEY: smtplabs_your_api_key_here" \
+  -H "Accept: application/json"
+Response:
+
+
+{
+  "id": "string",
+  "msgid": "string",
+  "from": {
+    "name": "string",
+    "address": "string"
+  },
+  "to": [
+    {
+      "name": "string",
+      "address": "string"
+    }
+  ],
+  "cc": [
+    "string"
+  ],
+  "bcc": [
+    "string"
+  ],
+  "subject": "string",
+  "isRead": true,
+  "isFlagged": true,
+  "verifications": [
+    "string"
+  ],
+  "autoDeleteEnabled": true,
+  "expiresAt": "2025-04-01T00:00:00.000Z",
+  "text": "string",
+  "html": [
+    "string"
+  ],
+  "hasAttachments": true,
+  "attachments": [
+    {
+      "id": "string",
+      "filename": "string",
+      "contentType": "string",
+      "disposition": "string",
+      "transferEncoding": "string",
+      "related": true,
+      "size": 0,
+      "downloadUrl": "string"
+    }
+  ],
+  "size": 0,
+  "downloadUrl": "string",
+  "createdAt": "2025-04-01T00:00:00.000Z",
+  "updatedAt": "2025-04-01T00:00:00.000Z"
+}
+Delete a Message
+
+DELETE /accounts/{accountId}/mailboxes/{mailboxId}/messages/{id}
+Deletes the Message resource.
+
+Body:
+
+None
+
+Params:
+
+accountId
+string
+required
+The account identifier.
+mailboxId
+string
+required
+The mailbox identifier.
+id
+string
+required
+The message identifier.
+curl Example:
+
+
+curl -X DELETE "https://api.smtp.dev/accounts/{accountId}/mailboxes/{mailboxId}/messages/{id}" \
+  -H "X-API-KEY: smtplabs_your_api_key_here"
+Response:
+
+None
+
+(Returns status code 204 if successful.)
+
+Update a Message
+
+PATCH /accounts/{accountId}/mailboxes/{mailboxId}/messages/{id}
+Updates the Message resource. For example, mark a message as read or flagged.
+
+Body:
+
+isRead
+boolean
+Set to true to mark the message as read
+isFlagged
+boolean
+Set to true to mark the message as flagged
+autoDeleteEnabled
+boolean
+Enable/disable auto-deletion of the message
+expiresAt
+string
+ISO date-time when the message should expire
+Params:
+
+accountId
+string
+required
+The account identifier
+mailboxId
+string
+required
+The mailbox identifier
+id
+string
+required
+The message identifier
+curl Example:
+
+
+curl -X PATCH "https://api.smtp.dev/accounts/{accountId}/mailboxes/{mailboxId}/messages/{id}" \
+  -H "X-API-KEY: smtplabs_your_api_key_here" \
+  -H "Content-Type: application/merge-patch+json" \
+  -H "Accept: application/json" \
+  -d '{
+    "isRead": true,
+    "isFlagged": true,
+    "autoDeleteEnabled": true,
+    "expiresAt": "2025-05-01T00:00:00.000Z"
+  }'
+Response:
+
+
+{
+  "isRead": true,
+  "isFlagged": true,
+  "autoDeleteEnabled": true,
+  "expiresAt": "2025-05-01T00:00:00.000Z"
+}
+To check if the message has been updated, you can also verify the status code is 200.
+
+Get a Message Source
+
+GET /accounts/{accountId}/mailboxes/{mailboxId}/messages/{id}/source
+Gets a Message's Source resource (If you don't know what this is, you either don't really want to use it or you should read this !)
+
+Body::
+
+None
+
+Params::
+
+accountId
+string
+required
+The account identifier.
+mailboxId
+string
+required
+The mailbox identifier.
+id
+string
+required
+The message identifier.
+curl Example:
+
+
+curl -X GET "https://api.smtp.dev/accounts/{accountId}/mailboxes/{mailboxId}/messages/{id}/source" \
+  -H "X-API-KEY: smtplabs_your_api_key_here" \
+  -H "Accept: application/json"
+Response:
+
+
+{
+  "@context": "string",
+  "@id": "string",
+  "@type": "string",
+  "raw": "string"
+}
+You don't really need the downloadUrl if you already have the "data" String. It will simply download that data.
+
+Download a Message Attachment
+
+GET /accounts/{accountId}/mailboxes/{mailboxId}/messages/{id}/attachment/{attachmentId}
+Gets a Message's attachment.
+
+Body:
+
+None
+
+Params:
+
+accountId
+string
+required
+The account identifier.
+mailboxId
+string
+required
+The mailbox identifier.
+id
+string
+required
+The message identifier.
+attachmentId
+string
+required
+The attachment identifier.
+curl Example:
+
+
+curl -X GET "https://api.smtp.dev/accounts/{accountId}/mailboxes/{mailboxId}/messages/{id}/attachment/{attachmentId}" \
+  -H "X-API-KEY: smtplabs_your_api_key_here" \
+  -H "Accept: application/json" \
+  -o welcome.pdf
+Response:
+
+Binary file content (saved to the specified output file).
+
+For JSON metadata about the attachment:
+
+
+curl -X GET "https://api.smtp.dev/accounts/{accountId}/mailboxes/{mailboxId}/messages/{id}" \
+  -H "X-API-KEY: smtplabs_your_api_key_here" \
+  -H "Accept: application/json"
+
+{
+  "id": "string",
+  "filename": "string",
+  "contentType": "string",
+  "disposition": "string",
+  "transferEncoding": "string",
+  "related": true,
+  "size": 0,
+  "downloadUrl": "string"
+}
+Download a Message
+
+GET /accounts/{accountId}/mailboxes/{mailboxId}/messages/{id}/download
+Downloads a Message resource.
+
+Body:
+
+None
+
+Params:
+
+accountId
+string
+required
+The account identifier.
+mailboxId
+string
+required
+The mailbox identifier.
+id
+string
+required
+The message identifier.
+curl Example:
+
+
+curl -X GET "https://api.smtp.dev/accounts/{accountId}/mailboxes/{mailboxId}/messages/{id}/download" \
+  -H "X-API-KEY: smtplabs_your_api_key_here" \
+  -o message.eml
+Response:
+
+Binary file content (saved to the specified output file).
+
+(Returns status code 200 if successful.)
+
+Move a Message
+
+PUT /accounts/{accountId}/mailboxes/{mailboxId}/messages/{id}/move
+Moves a Message resource to a different mailbox.
+
+Body:
+
+mailbox
+string
+required
+The target mailbox identifier
+Params
+
+accountId
+string
+required
+The account identifier.
+mailboxId
+string
+required
+The mailbox identifier.
+id
+string
+required
+The message identifier.
+curl Example:
+
+
+curl -X PUT "https://api.smtp.dev/accounts/{accountId}/mailboxes/{mailboxId}/messages/{id}/move" \
+  -H "X-API-KEY: smtplabs_your_api_key_here" \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json" \
+  -d '{
+    "mailbox": "{mailboxId}"
+  }'
+Response:
+
+
+{
+  "mailbox": "string"
+}
+To check if the message has been moved, you could also check if the status code is 200!
+
+Attachments Note
+Message's attachments need to be handled in a certain way. When you download them, be sure to download them in the right encoding (For example, a .exe file will need to be downloaded as an array of integers, but a json will need to be downloaded as String! Also, remember: API are friends. contentType member can help you know how to decode the file)
+Tokens
+List Tokens
+
+GET /tokens
+Retrieves the collection of Token resources.
+
+Body:
+
+None
+
+Params:
+
+page
+int
+The collection page number
+curl Example:
+
+
+curl -X GET "https://api.smtp.dev/tokens?page=1" \
+  -H "X-API-KEY: smtplabs_your_api_key_here" \
+  -H "Accept: application/json"
+Response:
+
+
+{
+  "member": [
+    {
+      "id": "string",
+      "name": "My API Token",
+      "description": "Used for automated testing",
+      "createdAt": "2025-04-01T00:00:00.000Z",
+      "updatedAt": "2025-04-01T00:00:00.000Z"
+    }
+  ],
+  "totalItems": 1
+}
+Create a Token
+
+POST /tokens
+Creates a new API token.
+
+Body:
+
+name
+string
+required
+A name for the token to identify its purpose
+description
+string
+Optional description of what the token is used for
+Params:
+
+None
+
+curl Example:
+
+
+curl -X POST "https://api.smtp.dev/tokens" \
+  -H "X-API-KEY: smtplabs_your_api_key_here" \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json" \
+  -d '{
+    "name": "Integration Token",
+    "description": "Used for automated testing"
+  }'
+Response:
+
+
+{
+  "id": "string",
+  "token": "smtplabs_abcdef123456", // This is only returned once when created
+  "name": "My API Token",
+  "description": "Used for automated testing",
+  "createdAt": "2025-04-01T00:00:00.000Z",
+  "updatedAt": "2025-04-01T00:00:00.000Z"
+}
+Save the token value immediately as it will only be shown once and cannot be retrieved again.
+Get a Token
+
+GET /tokens/{id}
+Retrieves a Token resource by its id.
+
+Body:
+
+None
+
+Params:
+
+id
+string
+required
+The token identifier
+curl Example:
+
+
+curl -X GET "https://api.smtp.dev/tokens/{id}" \
+  -H "X-API-KEY: smtplabs_your_api_key_here" \
+  -H "Accept: application/json"
+Response:
+
+
+{
+  "id": "string",
+  "name": "My API Token",
+  "description": "Used for automated testing",
+  "createdAt": "2025-04-01T00:00:00.000Z",
+  "updatedAt": "2025-04-01T00:00:00.000Z"
+}
+Delete a Token
+
+DELETE /tokens/{id}
+Deletes the Token resource.
+
+Body:
+
+None
+
+Params:
+
+id
+string
+required
+The token identifier
+curl Example:
+
+
+curl -X DELETE "https://api.smtp.dev/tokens/{id}" \
+  -H "X-API-KEY: smtplabs_your_api_key_here"
+Response:
+
+None
+
+(Returns status code 204 if successful.)
+
+Real-time Updates
+Mercure for Server-Sent Events (SSE)
+Instead of traditional webhooks, we use Mercure to provide real-time updates via Server-Sent Events (SSE).
+
+SSE is a standard technology that allows servers to push updates to web clients over HTTP, maintaining a single connection. This is more efficient than polling the API for updates.
+
+Listening for New Messages
+To listen for real-time updates about new messages:
+
+Base URL:
+
+https://mercure.smtp.dev/.well-known/mercure
+Topic:
+
+/accounts/{id}
+Example implementation (JavaScript):
+
+// Authentication required
+const eventSource = new EventSource(
+  'https://mercure.smtp.dev/.well-known/mercure?topic=/accounts/{accountId}',
+  {
+    headers: {
+      Authorization: 'Bearer smtplabs_your_api_key_here'
+    }
+  }
+)
+
+eventSource.onmessage = (event) => {
+  // Process the event data
+  const data = JSON.parse(event.data)
+  console.log('New update:', data)
+
+  // data.type will be "Account", "Mailbox", or "Message"
+  if (data.type === 'Message') {
+    // Process new message
+  }
+}
+
+eventSource.onerror = (err) => {
+  console.error('SSE error:', err)
+  // Implement reconnection logic
+}
+For each listened event, you'll receive updates with Account, Mailbox, or Message event types.
+
+Questions and suggestions
+If you have any questions or suggestions, please contact us.
+
+Tech stack
+Our stack includes API-Platform, Mercure, Nuxt.js, Haraka, Caddy, MongoDB, Node.js, RockyLinux

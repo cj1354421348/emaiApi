@@ -1,7 +1,6 @@
 from flask import Flask, jsonify, request
 from mail_client import MailTmClient
 import threading
-import time
 
 app = Flask(__name__)
 
@@ -13,6 +12,7 @@ clients_lock = threading.Lock()
 
 @app.route('/api/email/<email_address>', methods=['GET'])
 def get_email_content(email_address):
+    """获取指定邮箱的邮件内容"""
     try:
         # 检查是否已有该邮箱的客户端实例
         with clients_lock:
@@ -20,8 +20,6 @@ def get_email_content(email_address):
                 client = email_clients[email_address]
             else:
                 # 创建新的邮箱客户端实例
-                # 注意：这里需要确保邮箱地址是通过MailTm服务创建的
-                # 如果是外部邮箱地址，可能无法获取邮件
                 try:
                     client = MailTmClient(email_address.split('@')[0])
                     email_clients[email_address] = client
@@ -33,8 +31,7 @@ def get_email_content(email_address):
                     }), 500
 
         # 获取邮件内容
-        message = client.wait_getmessage(60)  # 等待60秒
-        print("app:获取邮件内容")
+        message = client.wait_for_message(60)  # 等待60秒
         if message:
             # 提取邮件正文部分（完整HTML）
             html_content = ""
@@ -64,9 +61,9 @@ def get_email_content(email_address):
         }), 500
 
 
-# 添加一个创建邮箱的接口
 @app.route('/api/email', methods=['POST'])
 def create_email():
+    """创建一个新的邮箱账户"""
     try:
         # 创建新的邮箱账户
         client = MailTmClient()
@@ -85,7 +82,6 @@ def create_email():
             "success": False,
             "error": str(e)
         }), 500
-
 
 
 if __name__ == '__main__':

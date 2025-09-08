@@ -16,6 +16,7 @@
 
 - `app.py` - Flask API服务入口
 - `mail_client.py` - Mail.tm客户端实现
+- `username_generator.py` - 用户名生成器
 - `config.py` - 配置管理
 - `.env` - 环境变量配置文件
 
