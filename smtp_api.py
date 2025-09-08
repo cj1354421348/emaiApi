@@ -63,35 +63,46 @@ class SMTPDevAPI:
             dict: 账户信息或None（未找到时）
         """
         try:
-            # 获取所有账户列表
-            response = self.session.get(f"{self.BASE_URL}/accounts")
+            logger.info(f"开始查找邮箱账户: {email}")
+            
+            # 使用带参数的GET请求直接查找账户（根据API文档）
+            response = self.session.get(
+                f"{self.BASE_URL}/accounts", 
+                params={"address": email}
+            )
+            logger.info(f"获取账户列表响应状态码: {response.status_code}")
             
             if response.status_code == 200:
-                accounts = response.json()
+                data = response.json()
+                accounts = data.get("member", []) if isinstance(data, dict) and "member" in data else data
+                logger.info(f"获取到 {len(accounts)} 个匹配账户")
                 
                 # 查找匹配的邮箱地址
                 for account in accounts:
                     if account.get("address") == email:
-                        # 获取完整账户信息
+                        logger.info(f"找到匹配账户: {email}")
                         account_id = account["id"]
-                        detail_response = self.session.get(
-                            f"{self.BASE_URL}/accounts/{account_id}"
-                        )
                         
+                        # 获取完整账户信息
+                        detail_response = self.session.get(f"{self.BASE_URL}/accounts/{account_id}")
                         if detail_response.status_code == 200:
+                            logger.info(f"成功获取账户详情: {account_id}")
                             return detail_response.json()
                         else:
-                            logger.error(f"获取账户详情失败: {detail_response.status_code}")
+                            logger.warning(f"获取账户详情失败，使用基础信息: {detail_response.status_code}")
                             return account
                 
-                logger.info(f"未找到邮箱地址 {email} 对应的账户")
+                logger.warning(f"未找到邮箱地址 {email} 对应的账户")
                 return None
             else:
-                logger.error(f"获取账户列表失败: {response.status_code}")
+                logger.error(f"获取账户列表失败: {response.status_code}, 响应: {response.text[:500]}")
                 return None
                 
         except requests.exceptions.RequestException as e:
             logger.error(f"查找账户请求出错: {str(e)}")
+            return None
+        except Exception as e:
+            logger.error(f"查找账户时发生未知错误: {str(e)}")
             return None
     
     def get_mailboxes(self, account_id):
